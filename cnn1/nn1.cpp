@@ -96,6 +96,10 @@ int main(int argc, char **argv) {
     optim.zero_grad();
     torch::Tensor y = model->forward(samp.first);
     torch::Tensor loss = torch::mse_loss(y, samp.second);
+    // cout << y << endl;
+    // for(int k = 0; k < y.numel(); ++k){
+    //   cout << *(static_cast<float*>(y.storage().data()) + k) << endl;
+    // }
     loss.backward();
     optim.step();
     //test
@@ -103,7 +107,7 @@ int main(int argc, char **argv) {
       auto samp = sample(test_data, batch_size, input_length);
       torch::Tensor loss_evl = torch::mse_loss(model->forward(samp.first), samp.second);
       #ifdef DEBUG
-        cout << "\033[1m\033[35m\rEposide #" << i << "\tLoss" << *static_cast<float*>(loss_evl.storage().data()) << "\033[0m" << endl;
+        cout << "\033[1m\033[35m\rEposide #" << i << "\tLoss" << loss_evl.item() << "\033[0m" << endl;
       #else
         perf << i << "," << *static_cast<float*>(loss_evl.storage().data()) << std::endl;
       #endif
@@ -113,7 +117,7 @@ int main(int argc, char **argv) {
   for(int i = 0; i < 100; i++){
     auto samp = sample(test_data, batch_size, input_length);
     torch::Tensor loss_evl = torch::mse_loss(model->forward(samp.first), samp.second);
-    perf << i*100+eposides << "," << *static_cast<float*>(loss_evl.storage().data()) << std::endl;
+    perf << i*100+eposides << "," << loss_evl.item() << std::endl;
   }
   perf.close();
 }
